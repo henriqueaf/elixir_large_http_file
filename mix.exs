@@ -7,7 +7,8 @@ defmodule HTTPStream.MixProject do
       version: "0.1.0",
       elixir: "~> 1.9",
       start_permanent: Mix.env() == :prod,
-      deps: deps()
+      deps: deps(),
+      elixirc_paths: elixirc_paths(Mix.env())
     ]
   end
 
@@ -15,7 +16,8 @@ defmodule HTTPStream.MixProject do
   def application do
     [
       extra_applications: [:logger],
-      mod: {HTTPStream, []}
+      mod: {HTTPStream, []},
+      applications: applications(Mix.env)
     ]
   end
 
@@ -25,7 +27,16 @@ defmodule HTTPStream.MixProject do
       # {:dep_from_hexpm, "~> 0.3.0"},
       # {:dep_from_git, git: "https://github.com/elixir-lang/my_dep.git", tag: "0.1.0"}
       {:httpoison, "~> 1.6"},
-      {:stream_gzip, "~> 0.4.0"}
+      {:stream_gzip, "~> 0.4.0"},
+      {:plug_cowboy, "~> 2.0", only: [:test]},
+      {:poison, "~> 3.1", only: [:test]}
     ]
   end
+
+  defp applications(:test), do: applications(:default) ++ [:cowboy, :plug]
+  defp applications(_), do: [:httpoison, :stream_gzip]
+
+  # Specifies which paths to compile per environment.
+  defp elixirc_paths(:test), do: ["test/support" | elixirc_paths(:default)]
+  defp elixirc_paths(_), do: ["lib"]
 end
